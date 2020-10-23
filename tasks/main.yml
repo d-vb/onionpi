@@ -1,0 +1,90 @@
+- name: delete user pi
+  user:
+    name: "pi"
+    remove: true
+    state: absent
+
+- name: install packages
+  apt:
+    name:
+      - "hostapd"
+      - "dnsmasq"
+      - "iptables-persistent"
+      - "netfilter-persistent"
+      - "tor"
+    update_cache: true
+    state: latest
+
+- name: configure dhcpcd
+  lineinfile:
+    path: "/etc/dhcpcd.conf"
+    line: "{{ item }}"
+  loop:
+    - "interface wlan0"
+    - "static ip_address={{ wifi_ip_address }}/24"
+    - "nohook wpa_supplicant"
+    - "noarp"
+  notify: restart dhcpcd
+
+- name: configure dnsmasq
+  template:
+    src: "dnsmasq.conf"
+    dest: "/etc/dnsmasq.conf"
+  notify: restart dnsmasq
+
+- name: ensure wireless operation
+  shell: "rfkill unblock wlan"
+  changed_when: false
+
+- name: configure hostapd
+  template:
+    src: "hostapd.conf"
+    dest: "/etc/hostapd/hostapd.conf"
+  notify: restart hostapd
+
+- name: configure tor
+  lineinfile:
+    path: "/etc/tor/torrc"
+    line: "{{ item }}"
+  loop:
+    - "Log notice file /var/log/tor/notices.log"
+    - "VirtualAddrNetwork 10.192.0.0/10"
+    - "AutomapHostsSuffixes .onion,.exit"
+    - "AutomapHostsOnResolve 1"
+    - "TransPort {{ wifi_ip_address }}:9040"
+    - "DNSPort {{ wifi_ip_address }}:53"
+  notify: restart tor
+
+- name: create tor log
+  copy:
+    dest: "/var/log/tor/notices.log"
+    content: ""
+    force: false
+    owner: "debian-tor"
+    group: "adm"
+    mode: 0640
+
+- name: configure iptables
+  iptables:
+    table: "nat"
+    chain: "PREROUTING"
+    in_interface: "wlan0"
+    protocol: "{{ item.protocol }}"
+    syn: "{{ item.syn }}"
+    destination_port: "{{ item.destination_port | default(omit) }}"
+    jump: "REDIRECT"
+    to_ports: "{{ item.to_ports }}"
+  register: iptables
+  loop:
+    - { protocol: "tcp", syn: "ignore", destination_port: "22", to_ports: "22" }
+    - { protocol: "udp", syn: "ignore", destination_port: "53", to_ports: "53" }
+    - { protocol: "tcp", syn: "match", to_ports: "9040" }
+
+- name: save iptables
+  shell: "netfilter-persistent save"
+  when: iptables.changed
+
+- name: configure routing
+  sysctl:
+    name: "net.ipv4.ip_forward"
+    value: "1"

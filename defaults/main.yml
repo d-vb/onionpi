@@ -1,0 +1,7 @@
+wifi_ip_address: "192.168.42.1"
+dhcp_range_begin: "192.168.42.2"
+dhcp_range_end: "192.168.42.254"
+dhcp_subnet: "255.255.255.0"
+address: "onionpi"
+domain: "wlan"
+ssid: "onionpi"

@@ -1,0 +1,20 @@
+- name: restart dhcpcd
+  systemd:
+    name: "dhcpcd"
+    state: restarted
+
+- name: restart dnsmasq
+  systemd:
+    name: "dnsmasq"
+    state: restarted
+
+- name: restart hostapd
+  systemd:
+    name: "hostapd"
+    masked: false
+    state: restarted
+
+- name: restart tor
+  systemd:
+    name: "tor@default"
+    state: restarted
