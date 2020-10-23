@@ -9,10 +9,10 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
 * Download the latest image of [Raspberry Pi OS (32-bit) Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) and follow the [installation manual](https://www.raspberrypi.org/documentation/installation/installing-images/).
 
   ```Shell
-  sudo dd bs=4M if=YYYY-MM-DD-raspios-buster-lite-armhf.img of=/dev/sdX conv=fsync
-  sudo dd bs=4M if=/dev/sdX of=from-sd-card.img count=442
-  sudo truncate --reference YYYY-MM-DD-raspios-buster-lite-armhf.img from-sd-card.img
-  diff -s from-sd-card.img YYYY-MM-DD-raspios-buster-lite-armhf.img
+  sudo dd bs=4M if=YYYY-MM-DD-raspios-buster-armhf-lite.img of=/dev/sdX conv=fsync
+  sudo dd bs=4M if=/dev/sdX of=from-sd-card.img count=xxx
+  sudo truncate --reference YYYY-MM-DD-raspios-buster-armhf-lite.img from-sd-card.img
+  diff -s from-sd-card.img YYYY-MM-DD-raspios-buster-armhf-lite.img
   sync
   ```
 
@@ -64,3 +64,13 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
   ```Shell
   ansible-playbook onionpi.yml -i inventories/onionpi.yml
   ```
+
+## And finally
+
+* Connect to your Onion Pi Tor Wifi (default SSID is onionpi) with the passphrase you specified earlier.
+
+* Visit https://check.torproject.org/ to verify you are using Tor.
+
+## Customizing
+
+If you want to adjust some default settings like SSID and IP-Addresses, just edit `defaults/main.yml`.
