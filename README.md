@@ -43,10 +43,11 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
   ```YAML
   all:
     children:
-      hosts:
-        onionpi:
-          ansible_user: "root"
-          wpa_passphrase: "ENTER_YOUR_PASSPHRASE_HERE"
+      onionpi:
+        hosts:
+          onionpi:
+            ansible_user: "root"
+            wpa_passphrase: "ENTER_YOUR_PASSPHRASE_HERE"
   ```
 
 * Create an [Ansible playbook](https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html) `onionpi.yml` that will run your Ansible role.
