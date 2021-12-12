@@ -8,25 +8,26 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
 
 * Download the latest image of [Raspberry Pi OS (32-bit) Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) and follow the [installation manual](https://www.raspberrypi.org/documentation/installation/installing-images/).
 
-  ```Shell
-  sudo dd bs=4M if=YYYY-MM-DD-raspios-buster-armhf-lite.img of=/dev/sdX conv=fsync
-  sudo dd bs=4M if=/dev/sdX of=from-sd-card.img count=xxx
-  sudo truncate --reference YYYY-MM-DD-raspios-buster-armhf-lite.img from-sd-card.img
-  diff -s from-sd-card.img YYYY-MM-DD-raspios-buster-armhf-lite.img
+  ```sh
+  unzip YYYY-MM-DD-raspios-bullseye-armhf-lite.zip
+  sudo dd if=YYYY-MM-DD-raspios-bullseye-armhf-lite.img of=/dev/sdX bs=4M conv=fsync status=progress
+  sudo dd if=/dev/sdX of=from-sd-card.img bs=4M count=xxx
+  sudo truncate --reference YYYY-MM-DD-raspios-bullseye-armhf-lite.img from-sd-card.img
+  diff -s from-sd-card.img YYYY-MM-DD-raspios-bullseye-armhf-lite.img
   sync
   ```
 
 * Login as user `pi` with the password `raspberry` (don't worry about the default password, we will delete this user while installtion). Start the [Raspberry Pi configuration tool](https://www.raspberrypi.org/documentation/configuration/raspi-config.md), set a hostname, [enable SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/README.md) and log out.
 
-  ```Shell
+  ```sh
   sudo raspi-config
-  2 Network Options -> N1 Hostname -> onionpi
-  5 Interfacing Options -> P2 SSH -> Yes
+  1 System Options -> S4 Hostname -> onionpi
+  3 Interfacing Options -> P2 SSH -> Yes
   ```
 
-* Configure [SSH access](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-2).
+* Configure [SSH access](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-2) for root user.
 
-  ```Shell
+  ```sh
   cat ~/.ssh/id_rsa.pub | ssh pi@onionpi "sudo sh -c 'mkdir -p /root/.ssh && chmod 700 /root/.ssh && cat >> /root/.ssh/authorized_keys'"
   ```
 
@@ -34,13 +35,13 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
 
 * Change to a suitable local directory and clone this repository to `roles/onionpi`.
 
-  ```Shell
+  ```sh
   git clone https://github.com/d-vb/onionpi.git roles/onionpi
   ```
 
 * Create an [Ansible inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) `inventories/onionpi.yml` and specify the Wifi passphrase you want to use to connect to your Onion Pi.
 
-  ```YAML
+  ```yaml
   all:
     children:
       onionpi:
@@ -52,7 +53,7 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
 
 * Create an [Ansible playbook](https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html) `onionpi.yml` that will run your Ansible role.
 
-  ```YAML
+  ```yaml
   - hosts: onionpi
     become: true
     roles:
@@ -61,7 +62,7 @@ You can plug the Ethernet cable into any Internet provider in your home, work, h
 
 * [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and run [ansible-playbook](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html).
 
-  ```Shell
+  ```sh
   ansible-playbook onionpi.yml -i inventories/onionpi.yml
   ```
 
